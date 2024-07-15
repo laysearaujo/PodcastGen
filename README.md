@@ -1,4 +1,4 @@
-# PodcastGen (podcastgen)
+# PodcastGen
 
 Podcast
 
