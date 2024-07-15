@@ -3,7 +3,9 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { path: '', redirect: '/create' }, // Redireciona da raiz para /create
+      { path: 'create', component: () => import('pages/CreatePodcast.vue') },
+      { path: 'podcast/:id', component: () => import('pages/PodcastDetail.vue') } // Rota para detalhes do podcast
     ]
   },
 
