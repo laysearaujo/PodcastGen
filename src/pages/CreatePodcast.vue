@@ -58,8 +58,17 @@
 <script setup>
 import { ref } from 'vue'
 
+// Função para obter a data atual no formato YYYY-MM-DD
+const getCurrentDate = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const podcastName = ref('')
-const releaseDate = ref('')
+const releaseDate = ref(getCurrentDate())
 const category = ref(null)
 
 const categories = [
