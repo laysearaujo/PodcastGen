@@ -7,7 +7,7 @@
       style="display: flex; flex-direction: column;"
     >
       <q-item-label header class="flex flex-center">
-        <q-btn outline class="q-ma-xs" style="width: 75%; color: blue;" label="PODCAST" icon="add" size="lg" @click="goToCreatePodcast"/>
+        <q-btn outline class="q-ma-xs" color="primary" label="PODCAST" icon="add" size="lg" @click="goToCreatePodcast"/>
       </q-item-label>
       
       <div class="q-pa-none" style="flex: 1; overflow-y: auto;">
