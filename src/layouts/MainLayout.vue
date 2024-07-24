@@ -39,32 +39,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 defineOptions({
   name: 'MainLayout'
 })
-// Simula uma lista de podcasts
-const podcastsList = ref([
-  { id: 1, title: 'Podcast 1' },
-  { id: 2, title: 'Podcast 2' },
-  { id: 3, title: 'Podcast 3' },
-  { id: 4, title: 'Podcast 4' },
-  { id: 5, title: 'Podcast 5' },
-  { id: 6, title: 'Podcast 6' },
-  { id: 7, title: 'Podcast 7' },
-  { id: 8, title: 'Podcast 8' },
-  { id: 1, title: 'Podcast 1' },
-  { id: 2, title: 'Podcast 2' },
-  { id: 3, title: 'Podcast 3' },
-  { id: 4, title: 'Podcast 4' },
-  { id: 5, title: 'Podcast 5' },
-  { id: 6, title: 'Podcast 6' },
-  { id: 7, title: 'Podcast 7' },
-  { id: 8, title: 'Podcast 8' },
-])
 
+const podcastsList = ref([])
 const router = useRouter()
 
 // Função para redirecionar para detalhes do podcast
@@ -77,4 +60,18 @@ const goToCreatePodcast = () => {
   router.push({ path: '/create' })
 }
 
+// Função para buscar a lista de podcasts da API
+const fetchPodcasts = async () => {
+  try {
+    const response = await axios.get('https://podcast-gen-back.onrender.com/podcast')
+    podcastsList.value = response.data
+  } catch (error) {
+    console.error('Erro ao buscar podcasts:', error)
+  }
+}
+
+// Buscar podcasts ao montar o componente
+onMounted(() => {
+  fetchPodcasts()
+})
 </script>
