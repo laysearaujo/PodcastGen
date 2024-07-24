@@ -10,14 +10,13 @@
           ficará acessível para todos
         </div>
         <q-input
-          v-model="podcastName"
+          v-model="title"
           label="Nome do Podcast"
           outlined
-          :rules="[val => !!val || 'O nome é obrigatório']"
+          :rules="[val => !!val || 'O título é obrigatório']"
           class="q-mt-md"
           style="flex: 1;"
         />
-        <!-- Botão com sombra removida -->
         <q-btn
           label="Criar"
           color="transparent"
@@ -29,16 +28,15 @@
 
       <div class="q-mb-md flex" style="align-items: baseline; gap: 16px;">
         <q-input
-          v-model="releaseDate"
+          v-model="period"
           type="date"
           label="Data de Lançamento"
           outlined
           :rules="[val => !!val || 'A data é obrigatória']"
           style="flex: 1;"
         />
-        <q-select
+        <q-input
           v-model="category"
-          :options="categories"
           label="Categoria"
           outlined
           :rules="[val => !!val || 'A categoria é obrigatória']"
@@ -56,7 +54,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+const title = ref('') // Título do Podcast
+const category = ref('') // Categoria do Podcast
+const period = ref('') // Período do Podcast
 
 // Função para obter a data atual no formato YYYY-MM-DD
 const getCurrentDate = () => {
@@ -67,25 +70,37 @@ const getCurrentDate = () => {
   return `${year}-${month}-${day}`
 }
 
-const podcastName = ref('')
-const releaseDate = ref(getCurrentDate())
-const category = ref(null)
+// Definir a data atual como valor inicial para o campo period
+onMounted(() => {
+  period.value = getCurrentDate()
+})
 
-const categories = [
-  'Tecnologia',
-  'Entretenimento',
-  'Educação',
-  'Notícias',
-  'Esportes'
-]
-
-const handleSubmit = () => {
-  if (podcastName.value && releaseDate.value && category.value) {
-    console.log('Novo podcast criado:', {
-      name: podcastName.value,
-      date: releaseDate.value,
-      category: category.value
-    })
+const handleSubmit = async () => {
+  if (title.value && category.value && period.value) {
+    try {
+      const response = await axios.post('https://podcast-gen-back.onrender.com/podcast', {
+        title: title.value,
+        category: category.value,
+        period: period.value
+      })
+      console.log('Novo podcast criado:', response.data)
+    } catch (error) {
+      console.log(title.value, category.value, period.value)
+      let titleType = typeof title.value;
+      let categoryType = typeof category.value;
+      let periodType = typeof period.value;
+      console.log(titleType, categoryType, periodType)
+      if (error.response) {
+        // O servidor respondeu com um status diferente de 2xx
+        console.error('Erro ao criar podcast:', error.response.data)
+      } else if (error.request) {
+        // A requisição foi feita mas não houve resposta
+        console.error('Erro ao criar podcast:', error.request)
+      } else {
+        // Algo deu errado na configuração da requisição
+        console.error('Erro ao criar podcast:', error.message)
+      }
+    }
   } else {
     console.log('Preencha todos os campos obrigatórios.')
   }
@@ -102,12 +117,9 @@ const handleSubmit = () => {
 
 .no-shadow-btn {
   box-shadow: none !important; /* Remove a sombra do botão */
-  box-shadow: none;
 }
 
 .q-btn:before {
   box-shadow: none !important; /* Remove a sombra do botão */
-  box-shadow: none;
 }
-
 </style>
