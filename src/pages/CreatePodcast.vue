@@ -47,8 +47,12 @@
           color="primary"
           type="submit"
           style="flex-shrink: 0;"
+          :loading="isLoading"
         />
       </div>
+      <q-banner v-if="errorMessage" class="bg-red-2 text-red-8 q-mb-md" dense>
+        {{ errorMessage }}
+      </q-banner>
     </q-form>
   </q-page>
 </template>
@@ -56,10 +60,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 const title = ref('') // Título do Podcast
 const category = ref('') // Categoria do Podcast
 const period = ref('') // Período do Podcast
+const isLoading = ref(false) // Estado de carregamento
+const errorMessage = ref('') // Mensagem de erro
+const router = useRouter()
 
 // Função para obter a data atual no formato YYYY-MM-DD
 const getCurrentDate = () => {
@@ -75,8 +83,32 @@ onMounted(() => {
   period.value = getCurrentDate()
 })
 
+// Função para verificar se o título já existe
+const checkTitleExists = async (title) => {
+  try {
+    const response = await axios.get('https://podcast-gen-back.onrender.com/podcast')
+    const existingTitles = response.data.map(podcast => podcast.title.toLowerCase())
+    return existingTitles.includes(title.toLowerCase())
+  } catch (error) {
+    console.error('Erro ao verificar títulos existentes:', error)
+    return false
+  }
+}
+
+// Função para lidar com o envio do formulário
 const handleSubmit = async () => {
   if (title.value && category.value && period.value) {
+    isLoading.value = true
+    errorMessage.value = ''
+    
+    // Verificar se o título já existe
+    const titleExists = await checkTitleExists(title.value)
+    if (titleExists) {
+      errorMessage.value = 'Título já existe. Escolha outro título.'
+      isLoading.value = false
+      return
+    }
+    
     try {
       const response = await axios.post('https://podcast-gen-back.onrender.com/podcast', {
         title: title.value,
@@ -84,25 +116,25 @@ const handleSubmit = async () => {
         period: period.value
       })
       console.log('Novo podcast criado:', response.data)
+      // Redirecionar para os detalhes do podcast recém-criado
+      router.push({ path: `/podcast/${response.data.id}` })
     } catch (error) {
-      console.log(title.value, category.value, period.value)
-      let titleType = typeof title.value;
-      let categoryType = typeof category.value;
-      let periodType = typeof period.value;
-      console.log(titleType, categoryType, periodType)
+      console.error('Erro ao criar podcast:', error)
       if (error.response) {
         // O servidor respondeu com um status diferente de 2xx
-        console.error('Erro ao criar podcast:', error.response.data)
+        errorMessage.value = 'Erro ao criar podcast: Tente outra Categoria'
       } else if (error.request) {
         // A requisição foi feita mas não houve resposta
-        console.error('Erro ao criar podcast:', error.request)
+        errorMessage.value = 'Erro ao criar podcast: Sem resposta do servidor'
       } else {
         // Algo deu errado na configuração da requisição
-        console.error('Erro ao criar podcast:', error.message)
+        errorMessage.value = 'Erro ao criar podcast.'
       }
+    } finally {
+      isLoading.value = false
     }
   } else {
-    console.log('Preencha todos os campos obrigatórios.')
+    errorMessage.value = 'Preencha todos os campos obrigatórios.'
   }
 }
 </script>
