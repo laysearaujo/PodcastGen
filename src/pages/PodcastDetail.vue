@@ -20,13 +20,12 @@
         <audio controls :src="podcast.audioUrl" class="audio-player">
           Seu navegador não suporta o elemento <code>audio</code>.
         </audio>
-        <a :href="podcast.audioUrl" download>
-          <q-btn
-            icon="download"
-            class="download-btn"
-            flat
-          />
-        </a>
+        <q-btn
+          icon="download"
+          @click="openAudioInNewTab"
+          class="download-btn"
+          flat
+        />
       </div>
 
       <div class="text-h6 q-mb-sm">Transcrição:</div>
@@ -51,6 +50,14 @@ const fetchPodcastDetails = async (podcastId) => {
     console.log(podcast.value)
   } catch (error) {
     console.error('Erro ao buscar detalhes do podcast:', error)
+  }
+}
+
+// Função para abrir o áudio em uma nova aba
+const openAudioInNewTab = () => {
+  const audioUrl = podcast.value.audioUrl
+  if (audioUrl) {
+    window.open(audioUrl, '_blank')  // Abre o áudio em uma nova aba
   }
 }
 
